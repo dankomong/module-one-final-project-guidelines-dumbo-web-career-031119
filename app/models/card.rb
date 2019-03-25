@@ -1,6 +1,6 @@
 class Card < ActiveRecord::Base
-  has_many :ownerships
-  has_many :decks, through: :ownerships
+  has_many :owners
+  has_many :decks, through: :owners
 
   def self.get_card_by(type)
     self.send(type)

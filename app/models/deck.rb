@@ -1,10 +1,10 @@
 class Deck < ActiveRecord::Base
   belongs_to :user
-  has_many :ownerships
-  has_many :cards, through: :ownerships
+  has_many :owners
+  has_many :cards, through: :owners
 
   def add_card(card)
-    Owner.new()
+     Owner.create(card_id: card.id, deck_id: self.id)
   end
 
   def card_count
