@@ -1,20 +1,7 @@
 require_relative '../config/environment'
-require "catpix"
 
-Catpix::print_image "pokemon.png",
-  :limit_x => 1.0,
-  :limit_y => 0,
-  :center_x => true,
-  :center_y => true,
-  :bg => "white",
-  :bg_fill => true
-
-system "clear"
 
 prompt = TTY::Prompt.new
-
-
-prompt.ask("What is your name?", default: ENV['USER'])
 
 main_menu_choice = prompt.select("Welcome to the Yu-Gi-Oh database!", %w(Sign-Up Log-in))
 
@@ -24,7 +11,7 @@ current_user = nil
 
 while current_user == nil
     username = prompt.ask('Username:', required: true)
-    pass = prompt.ask('password:', echo: false, required: true)
+    pass = prompt.mask('Password:', required: true)
     if main_menu_choice == "Sign-Up"
         if User.find_by(name: username) != nil
             puts "Sorry, username is taken. Try again."
@@ -40,6 +27,38 @@ while current_user == nil
         end
     end
 end
+
+decks = current_user.decks
+
+
+def create_deck(current_user, prompt)
+  deck_name = prompt.ask('What would you like to name your deck?', required: true)
+  current_user.decks.create(name: deck_name)
+end
+
+input = 'y'
+
+while input == 'y'
+  deck_selection = prompt.select("Welcome to the Decks menu!", ["View Decks", "Create Deck"])
+  if deck_selection == "View Decks"
+    if decks == []
+      puts "You don't have any decks. Please create one."
+      if prompt.yes?("Would you like to go back to the decks menu?")
+        input = 'y'
+      end
+    else
+      decks_with_names = decks.map do |deck|
+        deck.name
+      end
+      prompt.select("Deck List", decks_with_names, filter: true)
+    end
+  elsif deck_selection == "Create Deck"
+    create_deck(current_user, prompt)
+  end
+end
+
+
+
 # prompt.ask('password:', echo: false)
 
 # User.find(2).destroy
