@@ -25,8 +25,8 @@ end
 desc 'deletes duplicate cards from database'
 task :deletedupes do
 	Card.all.uniq{|card| card.name}.each do |x|
-		if (Card.where(name:x.name).count > 1)
-			Card.where(name:x.name).last((Card.where(name: x.name).count)-1).each do |y|
+		if (Card.where(name: x.name).count > 1)
+			Card.where(name: x.name).last((Card.where(name: x.name).count)-1).each do |y|
 				y.destroy
 			end
 		end
