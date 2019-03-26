@@ -13,12 +13,9 @@ system "clear"
 
 prompt = TTY::Prompt.new
 
-<<<<<<< HEAD
-puts "HELLO WORLD"
-prompt = TTY::Prompt.new
 
 prompt.ask("What is your name?", default: ENV['USER'])
-=======
+
 main_menu_choice = prompt.select("Welcome to the Yu-Gi-Oh database!", %w(Sign-Up Log-in))
 
 
