@@ -47,15 +47,18 @@ while input == 'y'
         input = 'y'
       end
     else
-      decks_with_names = decks.map do |deck|
-        deck.name
+      fucku = prompt.select("Deck List") do |menu|
+        decks.each do |deck|
+          menu.choice deck.name, deck
+        end
       end
-      prompt.select("Deck List", decks_with_names, filter: true)
+      binding.pry
     end
   elsif deck_selection == "Create Deck"
     create_deck(current_user, prompt)
   end
 end
+
 
 
 
