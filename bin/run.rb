@@ -43,4 +43,3 @@ end
 # prompt.ask('password:', echo: false)
 
 # User.find(2).destroy
->>>>>>> cd56a5ac3b641f0981b70b353c745080400c5862
