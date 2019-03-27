@@ -132,14 +132,14 @@ end
 
 
 def card_menu
-  card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card", "Add a Card", "Back"])
-  if card_menu_choice == "View a Card"
+  card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card from our library", "Add a Card", "Remove a Card"])
+  if card_menu_choice == "View a Card from our library"
     filter_cards_by_search
   elsif card_menu_choice == "Add a Card"
     # method to add Card
     card_row = nil
     while card_row == nil
-      card_name = $prompt.ask("Please enter the name of the card you want to add:")
+      card_name = $prompt.ask("Please enter the name of the card you want to add to your deck: ")
       card_row = Card.find_by(name: card_name)
       if card_row == nil
         puts "Sorry. Your card wasn't found. Try again."
@@ -147,10 +147,26 @@ def card_menu
         $current_deck.add_card(card_row)
         puts "Your card #{card_row.name} has been added! Thank you!"
       end
+    end
+  elsif card_menu_choice == "Remove a Card"
+    # method to remove card
+    card_row = nil
+    while card_row == nil
+      card_name = $prompt.ask("Please enter the name of the card you want to remove from your deck: ")
+      # card_row = Card.find_by(name: card_name)
+      $current_deck.cards.each do |ycard|
+        if ycard.name == card_name
+          card_row = ycard
+        end
+      end
+      if card_row == nil
+        puts "Sorry. Your card wasn't found. Try again."
+      else
+        $current_deck.delete_card(card_row)
+        puts "Your card #{card_row.name} has been deleted! Thank you!"
+      end
       deck_menu_2
     end
-  elsif card_menu_choice == "Back"
-
   end
 end
 

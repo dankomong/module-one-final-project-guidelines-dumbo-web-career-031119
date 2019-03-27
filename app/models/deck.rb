@@ -13,6 +13,11 @@ class Deck < ActiveRecord::Base
   end
 
   def delete_card(card)
-
+    self.cards.each do |card_user|
+      if card_user.name == card.name
+        card.destroy
+      end
+    end
   end
+
 end
