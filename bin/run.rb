@@ -79,8 +79,8 @@ def card_info(selected_card)
     puts "Name: #{selected_card.name}"
     puts "Type: #{selected_card.cardtype}"
     puts "Race: #{selected_card.race}"
-    puts "Attack: #{selected_card.name}"
-    puts "Defense: #{selected_card.name}"
+    puts "Attack: #{selected_card.attack}"
+    puts "Defense: #{selected_card.defense}"
     puts "Attribute: #{selected_card.cardattr}"
     puts "Description: #{selected_card.description}"
   else
@@ -110,7 +110,7 @@ def deck_menu_2
     current_card_list
   elsif card_menu_choice == "Customize Deck"
     # bring them to customize deck menu
-
+    card_menu
   end
 end
 
@@ -144,16 +144,38 @@ end
 
 def filter_cards_by_search
   card_stat_choice = $prompt.select("Please select a filter below to search for a card!", ["Name", "Type", "Level", "Attribute"])
-  user_input = $prompt.ask("Type in the #{card_stat_choice} of the card")
-    cards_arr = Card.where(card_stat_choice.to_sym => user_input)
-    if cards_arr.length == 0
-      puts "Sorry, there are no cards that match your search."
-    else
-      cards_arr.each do |card|
-        card_info(card)
-      end
+  if card_stat_choice == "Name"
+     user_input = $prompt.ask("Type in the name of the card")
+     cards_arr = Card.where(name: user_input)
+  elsif card_stat_choice == "Type"
+     user_input = $prompt.ask("Type in the type of the card")
+     cards_arr = Card.where(cardtype: user_input)
+  elsif card_stat_choice == "Level"
+     user_input = $prompt.ask("Type in the level of the card")
+     cards_arr = Card.where(level: user_input)
+  elsif card_stat_choice == "Attribute"
+     user_input = $prompt.ask("Type in the attribute of the card")
+     cards_arr = Card.where(cardattr: user_input)
+  end
+
+  if cards_arr.length == 0
+    puts "Sorry, there are no cards that match your search."
+  else
+    cards_arr.each do |card|
+      card_info(card)
     end
+  end
+#user_input = $prompt.ask("Type in the #{card_stat_choice} of the card")
+  #  cards_arr = Cards.where(cards_stat_choice.to_sym => input)
+    # if cards_arr.length == 0
+    #   puts "Sorry, there are no cards that match your search."
+    # else
+    #   cards_arr.each do |card|
+    #     card_info(card)
+    #   end
+    # end
 end
+
 
 ################### End of Methods ###################
 ################### Program Starts ###################
