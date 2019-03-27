@@ -51,7 +51,9 @@ def deck_menu_1
     deck_menu_choice = $prompt.select("What would you like to do?", ["View Decks", "Create Deck"])
     if deck_menu_choice == "View Decks"
       if $current_user.decks == []
+        system "clear"
         puts "You don't have any decks. Please create one."
+
       else
         $current_deck = $prompt.select("Deck List") do |menu|
           $current_user.decks.each do |deck|
@@ -68,12 +70,14 @@ def deck_menu_1
 end
 
 def create_deck
+  system 'clear'
   deck_name = $prompt.ask('What would you like to name your deck?', required: true)
   $current_user.decks.create(name: deck_name)
 end
 
 
 def card_info(selected_card)
+  system 'clear'
   if selected_card.level != nil
     puts "STATS"
     puts "Name: #{selected_card.name}"
@@ -94,6 +98,7 @@ end
 
 
 def current_card_list
+  system 'clear'
   selected_cards = $prompt.select("Card List") do |menu|
     $current_deck.cards.each_with_index do |card, index|
       menu.choice "#{index + 1}. #{card.name}", card
@@ -104,6 +109,7 @@ end
 
 
 def deck_menu_2
+  system 'clear'
   counter = 1
   card_menu_choice = $prompt.select("Customize your cards!", ["View Cards", "Customize Deck", "Back"])
   if card_menu_choice == "View Cards"
@@ -116,6 +122,7 @@ end
 
 
 def customize_deck
+  system 'clear'
   if $current_deck.cards.length == 0
     puts "You have no cards. Please add a card first."
     menu_choice = $prompt.select("Please select a choice:", ["Go to Cards Menu", "Back"])
@@ -132,6 +139,7 @@ end
 
 
 def card_menu
+  system 'clear'
   card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card", "Add a Card", "Back"])
   if card_menu_choice == "View a Card"
     filter_cards_by_search
@@ -147,7 +155,6 @@ def card_menu
         $current_deck.add_card(card_row)
         puts "Your card #{card_row.name} has been added! Thank you!"
       end
-      deck_menu_2
     end
   elsif card_menu_choice == "Back"
 
@@ -155,6 +162,7 @@ def card_menu
 end
 
 def filter_cards_by_search
+  system 'clear'
   card_stat_choice = $prompt.select("Please select a filter below to search for a card!", ["Name", "Type", "Level", "Attribute"])
   if card_stat_choice == "Name"
     user_input = $prompt.ask("Type in the name of the card")
