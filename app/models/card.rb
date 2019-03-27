@@ -10,4 +10,15 @@ class Card < ActiveRecord::Base
   def self.filter(input)
     
   end
+
+  def print_card_info
+  	system "clear"
+  	puts "Name: #{self.name}".colorize(:red)
+  	puts "Type: #{self.cardtype}".colorize(:light_red)
+  	!self.race.nil? ? (puts "Race: #{self.race}".colorize(:light_magenta)) : ()
+  	!self.attack.nil? ? (puts "Attack: #{self.attack}".colorize(:green)) : ()
+  	!self.defense.nil? ? (puts "Defense: #{self.defense}".colorize(:blue)) : ()
+  	!self.cardattr.nil? ? (puts "Attribute: #{self.cardattr}".colorize(:cyan)) : ()
+  	!self.description.nil? ? (puts "Description: #{self.description}".colorize(:yellow)) : ()
+  end
 end

@@ -3,4 +3,5 @@ class User < ActiveRecord::Base
   validates :password, presence: true, confirmation: true
   has_many :decks
 
+
 end
