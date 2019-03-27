@@ -105,12 +105,34 @@ end
 
 def deck_menu_2
   counter = 1
-  card_menu_choice = $prompt.select("Customize your cards!", ["View Cards", "Customize Deck", "Back"])
+  card_menu_choice = $prompt.select("Customize your cards!", ["View Cards", "Customize Deck", "Delete the entire deck"])
   if card_menu_choice == "View Cards"
     current_card_list
   elsif card_menu_choice == "Customize Deck"
     # bring them to customize deck menu
     card_menu
+  elsif card_menu_choice == "Delete the entire deck"
+    ############## start of remove deck method ##################
+    card_row = nil
+    while card_row == nil
+      # ** card_row will represent the deck row in this case **
+      deck_name = $prompt.ask("Please enter the name of the deck you want to remove from your profile: ")
+      Deck.all.each do |deck|
+        if deck.name == deck_name
+          card_row = deck
+        end
+      end
+      if card_row == nil
+        puts "Sorry. Your deck wasn't found. Try again."
+      else
+        card_row.destroy
+        # destroy the owner of the deck as well
+        owner = Owner.find_by(deck_id: card_row.id)
+        owner.destroy
+        puts "Your card #{card_row.name} has been deleted! Thank you!"
+      end
+    end
+    ############## end of remove deck method ##################
   end
 end
 
@@ -132,11 +154,11 @@ end
 
 
 def card_menu
-  card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card from our library", "Add a Card", "Remove a Card"])
+  card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card from our library", "Add a Card", "Remove a Card", "Delete the entire deck"])
   if card_menu_choice == "View a Card from our library"
     filter_cards_by_search
   elsif card_menu_choice == "Add a Card"
-    # method to add Card
+    ############## start of add card method ##################
     card_row = nil
     while card_row == nil
       card_name = $prompt.ask("Please enter the name of the card you want to add to your deck: ")
@@ -147,9 +169,10 @@ def card_menu
         $current_deck.add_card(card_row)
         puts "Your card #{card_row.name} has been added! Thank you!"
       end
+      ############## end of add card method ##################
     end
   elsif card_menu_choice == "Remove a Card"
-    # method to remove card
+    ############## start of remove card method ##################
     card_row = nil
     while card_row == nil
       card_name = $prompt.ask("Please enter the name of the card you want to remove from your deck: ")
@@ -165,43 +188,44 @@ def card_menu
         $current_deck.delete_card(card_row)
         puts "Your card #{card_row.name} has been deleted! Thank you!"
       end
-      deck_menu_2
     end
-  end
-end
+    ############## end of remove card method ##################
 
-def filter_cards_by_search
-  card_stat_choice = $prompt.select("Please select a filter below to search for a card!", ["Name", "Type", "Level", "Attribute"])
-  if card_stat_choice == "Name"
-    user_input = $prompt.ask("Type in the name of the card")
-    cards_arr = Card.where(name: user_input)
-  elsif card_stat_choice == "Type"
-    user_input = $prompt.ask("Type in the type of the card")
-    cards_arr = Card.where(cardtype: user_input)
-  elsif card_stat_choice == "Level"
-    user_input = $prompt.ask("Type in the level of the card")
-    cards_arr = Card.where(level: user_input)
-  elsif card_stat_choice == "Attribute"
-    user_input = $prompt.ask("Type in the attribute of the card")
-    cards_arr = Card.where(cardattr: user_input)
   end
 
-  if cards_arr.length == 0
-    puts "Sorry, there are no cards that match your search."
-  else
-    cards_arr.each do |card|
-      card_info(card)
+  def filter_cards_by_search
+    card_stat_choice = $prompt.select("Please select a filter below to search for a card!", ["Name", "Type", "Level", "Attribute"])
+    if card_stat_choice == "Name"
+      user_input = $prompt.ask("Type in the name of the card")
+      cards_arr = Card.where(name: user_input)
+    elsif card_stat_choice == "Type"
+      user_input = $prompt.ask("Type in the type of the card")
+      cards_arr = Card.where(cardtype: user_input)
+    elsif card_stat_choice == "Level"
+      user_input = $prompt.ask("Type in the level of the card")
+      cards_arr = Card.where(level: user_input)
+    elsif card_stat_choice == "Attribute"
+      user_input = $prompt.ask("Type in the attribute of the card")
+      cards_arr = Card.where(cardattr: user_input)
     end
+
+    if cards_arr.length == 0
+      puts "Sorry, there are no cards that match your search."
+    else
+      cards_arr.each do |card|
+        card_info(card)
+      end
+    end
+    #user_input = $prompt.ask("Type in the #{card_stat_choice} of the card")
+    #  cards_arr = Cards.where(cards_stat_choice.to_sym => input)
+    # if cards_arr.length == 0
+    #   puts "Sorry, there are no cards that match your search."
+    # else
+    #   cards_arr.each do |card|
+    #     card_info(card)
+    #   end
+    # end
   end
-  #user_input = $prompt.ask("Type in the #{card_stat_choice} of the card")
-  #  cards_arr = Cards.where(cards_stat_choice.to_sym => input)
-  # if cards_arr.length == 0
-  #   puts "Sorry, there are no cards that match your search."
-  # else
-  #   cards_arr.each do |card|
-  #     card_info(card)
-  #   end
-  # end
 end
 
 
