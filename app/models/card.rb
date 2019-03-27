@@ -5,4 +5,9 @@ class Card < ActiveRecord::Base
   def self.get_card_by(type)
     self.send(type)
   end
+
+
+  def self.filter(input)
+    
+  end
 end

@@ -2,7 +2,8 @@ require_relative '../config/environment'
 
 #### Global Variables ######
 $prompt = TTY::Prompt.new ##
-$current_user = nil       ##
+$current_user = nil
+$current_deck = nil       ##
 ############################
 
 
@@ -40,10 +41,10 @@ def timetoduel
   system "clear"
   welcome_menu
   system "clear"
-  new_deck_menu
+  deck_menu_1
 end
 
-def new_deck_menu
+def deck_menu_1
   puts "Welcome #{$current_user.name}!"
   deckloop = true
   while(deckloop)
@@ -52,12 +53,13 @@ def new_deck_menu
       if $current_user.decks == []
         puts "You don't have any decks. Please create one."
       else
-        selected_deck = $prompt.select("Deck List") do |menu|
+        $current_deck = $prompt.select("Deck List") do |menu|
           $current_user.decks.each do |deck|
             menu.choice deck.name, deck
           end
         end
         # separate method here to customize the deck
+        customize_deck
       end
     elsif deck_menu_choice == "Create Deck"
       create_deck
@@ -70,76 +72,92 @@ def create_deck
   $current_user.decks.create(name: deck_name)
 end
 
+
+def card_info(selected_card)
+  if selected_card.level != nil
+    puts "STATS"
+    puts "Name: #{selected_card.name}"
+    puts "Type: #{selected_card.cardtype}"
+    puts "Race: #{selected_card.race}"
+    puts "Attack: #{selected_card.name}"
+    puts "Defense: #{selected_card.name}"
+    puts "Attribute: #{selected_card.cardattr}"
+    puts "Description: #{selected_card.description}"
+  else
+    puts "STATS"
+    puts "Name: #{selected_card.name}"
+    puts "Type: #{selected_card.cardtype}"
+    puts "Race: #{selected_card.race}"
+    puts "Description: #{selected_card.description}"
+  end
+end
+
+
+def current_card_list
+  selected_cards = $prompt.select("Card List") do |menu|
+    $current_deck.cards.each_with_index do |card, index|
+      menu.choice "#{index + 1}. #{card.name}", card
+    end
+  end
+  card_info(selected_cards)
+end
+
+
+def deck_menu_2
+  counter = 1
+  card_menu_choice = $prompt.select("Customize your cards!", ["View Cards", "Customize Deck", "Back"])
+  if card_menu_choice == "View Cards"
+    current_card_list
+  elsif card_menu_choice == "Customize Deck"
+    # bring them to customize deck menu
+
+  end
+end
+
+
+def customize_deck
+  if $current_deck.cards.length == 0
+    puts "You have no cards. Please add a card first."
+    menu_choice = $prompt.select("Please select a choice:", ["Go to Cards Menu", "Back"])
+    if menu_choice == "Go to Cards Menu"
+      # bring them to the card menu through card_menu method
+      card_menu
+    else
+      # back method
+    end
+  else
+    deck_menu_2
+  end
+end
+
+
+def card_menu
+    card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card", "Add a card", "Back"])
+    if card_menu_choice == "View a Card"
+      filter_cards_by_search
+    elsif card_menu_choice == "Add a Card"
+
+    elsif card_menu_choice == "Back"
+
+    end
+end
+
+def filter_cards_by_search
+  card_stat_choice = $prompt.select("Please select a filter below to search for a card!", ["Name", "Type", "Level", "Attribute"])
+  user_input = $prompt.ask("Type in the #{card_stat_choice} of the card")
+    cards_arr = Card.where(card_stat_choice.to_sym => user_input)
+    if cards_arr.length == 0
+      puts "Sorry, there are no cards that match your search."
+    else
+      cards_arr.each do |card|
+        card_info(card)
+      end
+    end
+end
+
 ################### End of Methods ###################
 ################### Program Starts ###################
 
 timetoduel
 
 #################### Program Ends ####################
-
-
-
-
-
-#############################################
-#############################################
-##### OLD CODE BELOW. WILL DELETE LATER #####
-#############################################
-#############################################
-
-
-
-# def deck_menu
-#   # prompt = TTY::Prompt.new
-#   # current_user = start_menu
-#   # decks = start_menu.decks
-#   # input = 'y'
-#
-#   # while input == 'y'
-#     deck_selection = prompt.select("Welcome to the Decks menu!", ["View Decks", "Create Deck"])
-#     if deck_selection == "View Decks"
-#       if decks == []
-#         puts "You don't have any decks. Please create one."
-#         if prompt.yes?("Would you like to go back to the decks menu?")
-#           input = 'y'
-#         end
-#       else
-#         decks_with_user = prompt.select("Deck List") do |menu|
-#           decks.each do |deck|
-#             menu.choice deck.name, deck
-#           end
-#         end
-#         # separate method here to customize the deck
-#       end
-#     elsif deck_selection == "Create Deck"
-#       current_user = start_menu
-#       create_deck(current_user, prompt)
-#     end
-#   # end
-# end
-# def start_menu
-#   main_menu_choice = prompt.select("Welcome to the Yu-Gi-Oh database!", %w(Sign-Up Log-in))
-#   current_user = nil
-#
-#   while current_user == nil
-#       username = prompt.ask('Username:', required: true)
-#       pass = prompt.mask('Password:', required: true)
-#       if main_menu_choice == "Sign-Up"
-#           sign_up(username, pass, current_user)
-#           # if User.find_by(name: username) != nil
-#           #     puts "Sorry, username is taken. Try again."
-#           # else
-#           #     current_user = User.create(name: username, password: pass)
-#           #     puts "You have signed up and successfully logged in. Enjoy!"
-#           #  end
-#       elsif main_menu_choice == 'Log-in'
-#           sign_in(username, pass, current_user)
-#       end
-#   end
-#
-#   return current_user
-# end
-
-# prompt.ask('password:', echo: false)
-
-# User.find(2).destroy
