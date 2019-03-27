@@ -10,31 +10,31 @@ $current_deck = nil       ##
 ################### Start of Methods ###################
 def sign_up(name, password)
   if User.find_by(name: name) != nil
-      puts "Sorry, username is taken. Try again."
+    puts "Sorry, username is taken. Try again."
   else
-      $current_user = User.create(name: name, password: password)
-      puts "You have signed up and successfully logged in. Enjoy!"
+    $current_user = User.create(name: name, password: password)
+    puts "You have signed up and successfully logged in. Enjoy!"
   end
 end
 
-def sign_in (name, password)
+def sign_in(name, password)
   $current_user = User.find_by(name: name, password: password)
   if $current_user == nil
-      puts "Your username or password is incorrect. Please try again."
+    puts "Your username or password is incorrect. Please try again."
   end
 end
 
 def welcome_menu
   main_menu_choice = $prompt.select("Welcome to the Yu-Gi-Oh database!", %w(Sign-Up Log-in))
   while $current_user == nil
-      username = $prompt.ask('Username:', required: true)
-      pass = $prompt.mask('Password:', required: true)
-      if main_menu_choice == "Sign-Up"
-          sign_up(username, pass)
-      elsif main_menu_choice == 'Log-in'
-          sign_in(username, pass)
-      end
+    username = $prompt.ask('Username:', required: true)
+    pass = $prompt.mask('Password:', required: true)
+    if main_menu_choice == "Sign-Up"
+      sign_up(username, pass)
+    elsif main_menu_choice == 'Log-in'
+      sign_in(username, pass)
     end
+  end
 end
 
 def timetoduel
@@ -132,30 +132,42 @@ end
 
 
 def card_menu
-    card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card", "Add a card", "Back"])
-    if card_menu_choice == "View a Card"
-      filter_cards_by_search
-    elsif card_menu_choice == "Add a Card"
-
-    elsif card_menu_choice == "Back"
-
+  card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card", "Add a Card", "Back"])
+  if card_menu_choice == "View a Card"
+    filter_cards_by_search
+  elsif card_menu_choice == "Add a Card"
+    # method to add Card
+    card_row = nil
+    while card_row == nil
+      card_name = $prompt.ask("Please enter the name of the card you want to add:")
+      card_row = Card.find_by(name: card_name)
+      if card_row == nil
+        puts "Sorry. Your card wasn't found. Try again."
+      else
+        $current_deck.add_card(card_row)
+        puts "Your card #{card_row.name} has been added! Thank you!"
+      end
+      deck_menu_2
     end
+  elsif card_menu_choice == "Back"
+
+  end
 end
 
 def filter_cards_by_search
   card_stat_choice = $prompt.select("Please select a filter below to search for a card!", ["Name", "Type", "Level", "Attribute"])
   if card_stat_choice == "Name"
-     user_input = $prompt.ask("Type in the name of the card")
-     cards_arr = Card.where(name: user_input)
+    user_input = $prompt.ask("Type in the name of the card")
+    cards_arr = Card.where(name: user_input)
   elsif card_stat_choice == "Type"
-     user_input = $prompt.ask("Type in the type of the card")
-     cards_arr = Card.where(cardtype: user_input)
+    user_input = $prompt.ask("Type in the type of the card")
+    cards_arr = Card.where(cardtype: user_input)
   elsif card_stat_choice == "Level"
-     user_input = $prompt.ask("Type in the level of the card")
-     cards_arr = Card.where(level: user_input)
+    user_input = $prompt.ask("Type in the level of the card")
+    cards_arr = Card.where(level: user_input)
   elsif card_stat_choice == "Attribute"
-     user_input = $prompt.ask("Type in the attribute of the card")
-     cards_arr = Card.where(cardattr: user_input)
+    user_input = $prompt.ask("Type in the attribute of the card")
+    cards_arr = Card.where(cardattr: user_input)
   end
 
   if cards_arr.length == 0
@@ -165,15 +177,15 @@ def filter_cards_by_search
       card_info(card)
     end
   end
-#user_input = $prompt.ask("Type in the #{card_stat_choice} of the card")
+  #user_input = $prompt.ask("Type in the #{card_stat_choice} of the card")
   #  cards_arr = Cards.where(cards_stat_choice.to_sym => input)
-    # if cards_arr.length == 0
-    #   puts "Sorry, there are no cards that match your search."
-    # else
-    #   cards_arr.each do |card|
-    #     card_info(card)
-    #   end
-    # end
+  # if cards_arr.length == 0
+  #   puts "Sorry, there are no cards that match your search."
+  # else
+  #   cards_arr.each do |card|
+  #     card_info(card)
+  #   end
+  # end
 end
 
 
