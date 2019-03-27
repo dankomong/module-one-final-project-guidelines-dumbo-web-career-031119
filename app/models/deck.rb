@@ -12,6 +12,7 @@ class Deck < ActiveRecord::Base
     # instance
   end
 
+
   def delete_card(card)
 
   end
