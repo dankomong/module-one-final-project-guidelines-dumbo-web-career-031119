@@ -10,6 +10,7 @@ class Deck < ActiveRecord::Base
   def card_count
     # count how many cards there are in the deck
     # instance
+    self.cards.all.length
   end
 
 

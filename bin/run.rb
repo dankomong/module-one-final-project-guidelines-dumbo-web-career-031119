@@ -13,7 +13,7 @@ def timetoduel
   # binding.pry
   prompt_selection = [0]
   while prompt_selection[0] != nil
-    #system "clear"
+    system "clear"
     case prompt_selection[0]
     when 0
       prompt_selection[0] = welcome_menu
@@ -32,10 +32,13 @@ def timetoduel
     when 7
       prompt_selection[0] = filter_cards_by_search#new  v
     when 8
-      prompt_selection[0] = view_card
+      prompt_selection[0] = add_card
     when 9
-      # prompt_selection[0] = deck_card_list
+      prompt_selection[0] = delete_card
     end
+    !$current_deck.nil? ? $current_deck.reload : ()
+  	!$current_user.nil? ? $current_user.reload : ()
+
   end
 end
 
@@ -88,7 +91,6 @@ def view_decks #2
 end
 
 def create_deck #3
-  system 'clear'
   deck_name = $prompt.ask('What would you like to name your deck?', required: true)
   $current_user.decks.create(name: deck_name)
   return 2
@@ -99,40 +101,63 @@ def deck_menu #4
   deck_menu_arr = [{name: "View Cards", value: 5}, {name: "Customize Deck", value: 6}, {name: "Delete Deck", value: -1},{name: "Back", value: 2}]
   $current_deck.cards.length == 0 ? (deck_menu_arr[0] = {name: "View Cards".colorize(:red), disabled: "(you don't have any cards in this deck"}) : ""
   menu_return_value = $prompt.select("Customizing your Deck: #{$current_deck.name}", deck_menu_arr)
+  # binding.pry
   if menu_return_value == -1
+  # binding.pry
+
     ## Destroying all instances of owner related to the deck we're about to delete
     $current_deck.delete_linked_owners
     $current_deck.destroy
     puts "You have deleted your deck '#{$current_deck.name}'"
     $current_deck = nil
-    menu_return_value = 2
+    menu_return_value = 1
   end
+  # binding.pry
+
   menu_return_value
 end
 
 def deck_card_list #5
+  if $current_deck.card_count == 0 
+    $prompt.keypress("You have no cards to remove.")
+    return 6
+  end
   $current_card = $prompt.select("Card List") do |menu|
     $current_deck.cards.each_with_index do |card, index|
       menu.choice "#{index + 1}. #{card.name}", card
     end
   end
-  return 6
+  $current_card.print_card_info
+
+  menu_choice = $prompt.select("What do you want to do?") do |menu|
+    menu.choice 'Delete card'
+    menu.choice 'Back'
+  end
+  if menu_choice == "Delete card"
+    delete_current_card
+  end
+  return 4
 end
 
 def customize_deck_menu_choices #6
+  # card_menu_choice = [{name: 'Add a Card', value: 8}, {name: 'Remove a Card', value: 5}, {name: 'Back', value: 4}]
+  card_menu_choice = $prompt.select("what would you like to do.") do |menu|
+    menu.choice 'Add a Card', 8
+    if $current_deck.card_count != 0
+      menu.choice 'Remove a Card', 5
+    else
+      menu.choice 'Remove a Card'.colorize(:red), 5,  disabled: "(You don't have any cards to remove!)"
+    end
+    menu.choice 'Back', 4
+  end
+
+
   # puts "what would you like to do. Deck: #{$current_deck.name}. Cards:#{$current_deck.owners.all.length}"
   # menu_choices = [{name: "Add a Card", value: 8}, {name: "Remove a Card", value: 9}]
   # card_menu_choice = $prompt.select(
     # "what would you like to do. Deck: #{$current_deck.name}. Cards:#{$current_deck.owners.all.length}", 
     # [{])
   # deck_destiny_choice = [{name: "Add a card", value: 7}, {name: "Delete card", value: -1},{name: "Back", value: 4}]
-  
-  card_menu_choice = $prompt.select("what would you like to do.") do |menu|
-    menu.choice 'Add a Card', 7
-    menu.choice 'Remove a Card', 9
-    # menu.choice 'back', #
-  end
-  return card_menu_choice
   ## Things to do
   ## make prompt with choices
   ## Add to deck *interpolate name*         ##Pass in array of hashes to prompt.choice with
@@ -142,22 +167,55 @@ def customize_deck_menu_choices #6
   ## Back                                   ##disable options appropriately
   ## $current_card = nil
   ## return 5
+
+  return card_menu_choice
 end
 
-def filter_cards_by_search #7
+def add_card #8
+  filter_cards_by_search
+  puts $current_card.print_card_info
+  menu_choice = $prompt.select("What would you like to do.") do |menu|
+    menu.choice "Add to deck"
+    menu.choice "Back"
+  end
+  # binding.pry
+
+  if menu_choice == "Add to deck"
+    $current_deck.add_card($current_card)
+    $prompt.keypress("#{$current_card.name} added to deck. \nPress any key to continue")
+  end
+  ## similar to current_card_menu_from_deck
+  ## instead, back returns to whatever case card search was
+  ## and add and remove to/from current deck returns 5
+  return 4
+end
+
+def delete_current_card #9
+  # show_deck_cards
+  Owner.find_by(deck: $current_deck, card: $current_card).destroy
+
+  # $prompt.keypress("#{$current_card.name} added to deck")
+  return 4
+end
+
+
+
+def filter_cards_by_search 
+  cards_arr = []
   card_stat_choice = $prompt.select("Please select a filter below to search for a card!", ["Name", "Type", "Level", "Attribute"])
   if card_stat_choice == "Name"
    user_input = $prompt.ask("Type in the name of the card")
-   cards_arr = Card.where(name: user_input)
+   user_input = "%#{user_input}%"
+   cards_arr = Card.where('name LIKE ?',user_input).sort_by{|card| card.name}
   elsif card_stat_choice == "Type"
    user_input = $prompt.ask("Type in the type of the card")
-   cards_arr = Card.where(cardtype: user_input)
+   cards_arr = Card.where(cardtype: user_input).sort_by{|card| card.name}
   elsif card_stat_choice == "Level"
    user_input = $prompt.ask("Type in the level of the card")
-   cards_arr = Card.where(level: user_input)
+   cards_arr = Card.where(level: user_input).sort_by{|card| card.name}
   elsif card_stat_choice == "Attribute"
    user_input = $prompt.ask("Type in the attribute of the card")
-   cards_arr = Card.where(cardattr: user_input)
+   cards_arr = Card.where(cardattr: user_input).sort_by{|card| card.name}
   end
 
   if cards_arr.length == 0
@@ -166,23 +224,13 @@ def filter_cards_by_search #7
   else#selection menu
    $current_card = $prompt.select("Select a card.") do |menu|
    cards_arr.each do |card|
-     menu.choice card.name
+     menu.choice card.name, card
    end
+  end
  end
- return 8
+#  return 8  make it not return anything just call from viewCard/DeleteCard
 end
 
-def view_card #8
-  puts $current_card
-  ## similar to current_card_menu_from_deck
-  ## instead, back returns to whatever case card search was
-  ## and add and remove to/from current deck returns 5
-  return 0
-end
-
-def remove_card
-
-end
 
 
 
@@ -213,45 +261,45 @@ end
 #     end
 # end
 
-def card_menu
-  card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card from our library", "Add a Card", "Remove a Card", "Delete the entire deck"])
-  if card_menu_choice == "View a Card from our library"
-    filter_cards_by_search
-  elsif card_menu_choice == "Add a Card"
-    ############## start of add card method ##################
-    card_row = nil
-    while card_row == nil
-      card_name = $prompt.ask("Please enter the name of the card you want to add to your deck: ")
-      card_row = Card.find_by(name: card_name)
-      if card_row == nil
-        puts "Sorry. Your card wasn't found. Try again."
-      else
-        $current_deck.add_card(card_row)
-        puts "Your card #{card_row.name} has been added! Thank you!"
-      end
-      ############## end of add card method ##################
-    end
-  elsif card_menu_choice == "Remove a Card"
-    ############## start of remove card method ##################
-    card_row = nil
-    while card_row == nil
-      card_name = $prompt.ask("Please enter the name of the card you want to remove from your deck: ")
-      # card_row = Card.find_by(name: card_name)
-      $current_deck.cards.each do |ycard|
-        if ycard.name == card_name
-          card_row = ycard
-        end
-      end
-      if card_row == nil
-        puts "Sorry. Your card wasn't found. Try again."
-      else
-        $current_deck.delete_card(card_row)
-        puts "Your card #{card_row.name} has been deleted! Thank you!"
-      end
-    end
-    ############## end of remove card method ##################
-  end
-end
+# def card_menu
+#   card_menu_choice = $prompt.select("Welcome to the cards menu!", ["View a Card from our library", "Add a Card", "Remove a Card", "Delete the entire deck"])
+#   if card_menu_choice == "View a Card from our library"
+#     filter_cards_by_search
+#   elsif card_menu_choice == "Add a Card"
+#     ############## start of add card method ##################
+#     card_row = nil
+#     while card_row == nil
+#       card_name = $prompt.ask("Please enter the name of the card you want to add to your deck: ")
+#       card_row = Card.find_by(name: card_name)
+#       if card_row == nil
+#         puts "Sorry. Your card wasn't found. Try again."
+#       else
+#         $current_deck.add_card(card_row)
+#         puts "Your card #{card_row.name} has been added! Thank you!"
+#       end
+#       ############## end of add card method ##################
+#     end
+#   elsif card_menu_choice == "Remove a Card"
+#     ############## start of remove card method ##################
+#     card_row = nil
+#     while card_row == nil
+#       card_name = $prompt.ask("Please enter the name of the card you want to remove from your deck: ")
+#       # card_row = Card.find_by(name: card_name)
+#       $current_deck.cards.each do |ycard|
+#         if ycard.name == card_name
+#           card_row = ycard
+#         end
+#       end
+#       if card_row == nil
+#         puts "Sorry. Your card wasn't found. Try again."
+#       else
+#         $current_deck.delete_card(card_row)
+#         puts "Your card #{card_row.name} has been deleted! Thank you!"
+#       end
+#     end
+#     ############## end of remove card method ##################
+#   end
+# end
   #user_input = $prompt.ask("Type in the #{card_stat_choice} of the card")
   #  cards_arr = Cards.where(cards_stat_choice.to_sym => input)
     # if cards_arr.length == 0
@@ -261,7 +309,7 @@ end
     #     card_info(card)
     #   end
     # end
-  end
+  
 
 
 ################### End of Methods ###################
