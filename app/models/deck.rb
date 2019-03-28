@@ -13,7 +13,9 @@ class Deck < ActiveRecord::Base
   end
 
 
-  def delete_card(card)
-
+  def delete_linked_owners
+    owners.all.each do |owner|
+      owner.destroy
+    end
   end
 end
