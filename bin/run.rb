@@ -43,7 +43,11 @@ def timetoduel
 end
 
 def welcome_menu #0
-  main_menu_choice = $prompt.select("Welcome to the Yu-Gi-Oh database!", %w(Sign-Up Log-in))
+  main_menu_choice = $prompt.select("Welcome to the Yu-Gi-Oh database!", %w(Sign-Up Log-in Exit))
+  if main_menu_choice == 'Exit'
+    # $current_user = 0
+    return nil
+  end
   while $current_user == nil
     username = $prompt.ask('Username:', required: true)
     pass = $prompt.mask('Password:', required: true)
@@ -72,12 +76,19 @@ def sign_in(name, password)
   end
 end
 
+def log_out
+  $current_user = nil
+  $current_deck = nil
+  $current_card = nil     
+  return 0
+end
 
 def deck_choice_menu #1
   puts "Welcome #{$current_user.name}!"
-  deck_menu_arr = [{name: "View Decks", value: 2}, {name: "Create Deck", value: 3}]
+  deck_menu_arr = [{name: "View Decks", value: 2}, {name: "Create Deck", value: 3},{name: "Log-out", value: 0}]
   $current_user.decks == [] ? (deck_menu_arr[0] = {name: "View Decks".colorize(:red), disabled: "(you don't have any decks to view)"}) : ""
-  $prompt.select("What would you like to do?", deck_menu_arr)
+  user_choice = $prompt.select("What would you like to do?", deck_menu_arr)
+  user_choice == 0 ? log_out : user_choice
 end
 
 
@@ -97,10 +108,10 @@ def create_deck #3
 end
 
 def deck_menu #4
-  puts "Deck: #{$current_deck.name}"
-  deck_menu_arr = [{name: "View Cards", value: 5}, {name: "Customize Deck", value: 6}, {name: "Delete Deck", value: -1},{name: "Back", value: 2}]
+  puts "Deck: " + "#{$current_deck.name}".colorize(:light_blue)
+  deck_menu_arr = [{name: "View Cards", value: 5}, {name: "Customize Deck", value: 6}, {name: "Delete Deck", value: -1},{name: "Back", value: 1}]
   $current_deck.cards.length == 0 ? (deck_menu_arr[0] = {name: "View Cards".colorize(:red), disabled: "(you don't have any cards in this deck"}) : ""
-  menu_return_value = $prompt.select("Customizing your Deck: #{$current_deck.name}", deck_menu_arr)
+  menu_return_value = $prompt.select("Customizing your Deck: " + "#{$current_deck.name}".colorize(:light_blue), deck_menu_arr)
   # binding.pry
   if menu_return_value == -1
   # binding.pry
@@ -118,15 +129,23 @@ def deck_menu #4
 end
 
 def deck_card_list #5
-  if $current_deck.card_count == 0 
-    $prompt.keypress("You have no cards to remove.")
+  if $current_deck.card_count == 0  
+    $prompt.keypress("You have no cards")
     return 6
   end
   $current_card = $prompt.select("Card List") do |menu|
     $current_deck.cards.each_with_index do |card, index|
       menu.choice "#{index + 1}. #{card.name}", card
     end
+    menu.choice "Back"
   end
+
+  # binding.pry
+  if $current_card == "Back" #couldnt return nil
+    $current_card = nil
+    return 6
+  end
+
   $current_card.print_card_info
 
   menu_choice = $prompt.select("What do you want to do?") do |menu|
@@ -136,7 +155,7 @@ def deck_card_list #5
   if menu_choice == "Delete card"
     delete_current_card
   end
-  return 4
+  return 5
 end
 
 def customize_deck_menu_choices #6
@@ -153,7 +172,7 @@ def customize_deck_menu_choices #6
   end
 
   def update_deck_name #7
-   puts "Current Deck: #{$current_deck.name}"
+   puts "Current Deck: #{$current_deck.name}".colorize(:light_blue)
    user_input = $prompt.ask("Type in the new name for your deck: ")    
    $current_deck.update(name: user_input)
    return 6
@@ -231,7 +250,7 @@ def filter_cards_by_search
   elsif card_stat_choice == "Attribute"
    user_input = $prompt.ask("Type in the attribute of the card")
    user_input = "%#{user_input}%"
-   cards_arr = Card.where('cardatter LIKE ?',user_input).sort_by{|card| card.name}
+   cards_arr = Card.where('cardattr LIKE ?',user_input).sort_by{|card| card.name}
 
   end
 
