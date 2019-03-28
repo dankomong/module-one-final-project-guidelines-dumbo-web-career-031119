@@ -172,7 +172,7 @@ def customize_deck_menu_choices #6
   end
 
   def update_deck_name #7
-   puts "Current Deck: #{$current_deck.name}".colorize(:light_blue)
+   puts "Current Deck: " + "#{$current_deck.name}".colorize(:light_blue)
    user_input = $prompt.ask("Type in the new name for your deck: ")    
    $current_deck.update(name: user_input)
    return 6
