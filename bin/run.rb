@@ -30,7 +30,7 @@ def timetoduel
     when 6
       prompt_selection[0] = customize_deck_menu_choices
     when 7
-      prompt_selection[0] = filter_cards_by_search#new  v
+      prompt_selection[0] = update_deck_name
     when 8
       prompt_selection[0] = add_card
     when 9
@@ -148,7 +148,15 @@ def customize_deck_menu_choices #6
     else
       menu.choice 'Remove a Card'.colorize(:red), 5,  disabled: "(You don't have any cards to remove!)"
     end
+    menu.choice 'Update deck name', 7
     menu.choice 'Back', 4
+  end
+
+  def update_deck_name #7
+   puts "Current Deck: #{$current_deck.name}"
+   user_input = $prompt.ask("Type in the new name for your deck: ")    
+   $current_deck.update(name: user_input)
+   return 6
   end
 
 
@@ -202,25 +210,35 @@ end
 
 def filter_cards_by_search 
   cards_arr = []
+  while cards_arr.length == 0 #keep searching till you are able to find a card
   card_stat_choice = $prompt.select("Please select a filter below to search for a card!", ["Name", "Type", "Level", "Attribute"])
+
   if card_stat_choice == "Name"
    user_input = $prompt.ask("Type in the name of the card")
    user_input = "%#{user_input}%"
    cards_arr = Card.where('name LIKE ?',user_input).sort_by{|card| card.name}
+
   elsif card_stat_choice == "Type"
    user_input = $prompt.ask("Type in the type of the card")
-   cards_arr = Card.where(cardtype: user_input).sort_by{|card| card.name}
+   user_input = "%#{user_input}%"
+   cards_arr = Card.where('cardtype LIKE ?',user_input).sort_by{|card| card.name}
+
   elsif card_stat_choice == "Level"
    user_input = $prompt.ask("Type in the level of the card")
-   cards_arr = Card.where(level: user_input).sort_by{|card| card.name}
+   user_input = "%#{user_input}%"
+   cards_arr = Card.where('level LIKE ?',user_input).sort_by{|card| card.name}
+
   elsif card_stat_choice == "Attribute"
    user_input = $prompt.ask("Type in the attribute of the card")
-   cards_arr = Card.where(cardattr: user_input).sort_by{|card| card.name}
+   user_input = "%#{user_input}%"
+   cards_arr = Card.where('cardatter LIKE ?',user_input).sort_by{|card| card.name}
+
   end
 
   if cards_arr.length == 0
-   puts "Sorry, there are no cards that match your search."
-   return 6
+    $prompt.keypress("Sorry, there are no cards that match your search. \n Press any key to continue")
+   system "clear"
+
   else#selection menu
    $current_card = $prompt.select("Select a card.") do |menu|
    cards_arr.each do |card|
@@ -228,7 +246,8 @@ def filter_cards_by_search
    end
   end
  end
-#  return 8  make it not return anything just call from viewCard/DeleteCard
+end
+#make it not return anything just call from viewCard/DeleteCard
 end
 
 
