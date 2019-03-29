@@ -46,6 +46,8 @@ def welcome_menu #0
   main_menu_choice = $prompt.select("Welcome to the Yu-Gi-Oh database!", %w(Sign-Up Log-in Exit))
   if main_menu_choice == 'Exit'
     # $current_user = 0
+    system 'clear'
+    puts "Believe in the heart of the cards"
     return nil
   end
   while $current_user == nil
@@ -95,7 +97,7 @@ end
 def view_decks #2
   $current_deck = $prompt.select("#{$current_user.name}'s deck list") do |menu|
     $current_user.decks.each do |deck|
-      menu.choice deck.name, deck
+      menu.choice "#{deck.name} - #{deck.cards.length} Cards", deck
     end
   end
   return 4
